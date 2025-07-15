@@ -1,3 +1,4 @@
+// app/cv-builder
 "use client"
 
 import { useState, useRef } from "react"
@@ -22,16 +23,27 @@ import {
   Settings,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+
 import { Input } from "@/components/ui/input"
+
 import { Textarea } from "@/components/ui/textarea"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
 import { Label } from "@/components/ui/label"
+
 import { Switch } from "@/components/ui/switch"
+
 import { Slider } from "@/components/ui/slider"
+
 import Header from "@/components/header"
+
 import Footer from "@/components/footer"
+
 import FloatingChat from "@/components/floating-chat"
 
 const fadeInUp = {
@@ -344,12 +356,78 @@ export default function CVBuilderPage() {
     }))
   }
 
+  const addLanguage = () => {
+    setCvData((prev) => ({
+      ...prev,
+      languages: [...prev.languages, { id: Date.now(), name: "", level: "Intermediate" }],
+    }))
+  }
+
+  const updateLanguage = (id: number, field: string, value: string) => {
+    setCvData((prev) => ({
+      ...prev,
+      languages: prev.languages.map((lang) => (lang.id === id ? { ...lang, [field]: value } : lang)),
+    }))
+  }
+
+  const removeLanguage = (id: number) => {
+    setCvData((prev) => ({
+      ...prev,
+      languages: prev.languages.filter((lang) => lang.id !== id),
+    }))
+  }
+
+  const addCertification = () => {
+    setCvData((prev) => ({
+      ...prev,
+      certifications: [
+        ...prev.certifications,
+        { id: Date.now(), name: "", issuer: "", date: "", url: "" },
+      ],
+    }))
+  }
+
+  const updateCertification = (id: number, field: string, value: string) => {
+    setCvData((prev) => ({
+      ...prev,
+      certifications: prev.certifications.map((cert) => (cert.id === id ? { ...cert, [field]: value } : cert)),
+    }))
+  }
+
+  const removeCertification = (id: number) => {
+    setCvData((prev) => ({
+      ...prev,
+      certifications: prev.certifications.filter((cert) => cert.id !== id),
+    }))
+  }
+
+  const addProject = () => {
+    setCvData((prev) => ({
+      ...prev,
+      projects: [...prev.projects, { id: Date.now(), name: "", description: "", technologies: "", url: "" }],
+    }))
+  }
+
+  const updateProject = (id: number, field: string, value: string) => {
+    setCvData((prev) => ({
+      ...prev,
+      projects: prev.projects.map((proj) => (proj.id === id ? { ...proj, [field]: value } : proj)),
+    }))
+  }
+
+  const removeProject = (id: number) => {
+    setCvData((prev) => ({
+      ...prev,
+      projects: prev.projects.filter((proj) => proj.id !== id),
+    }))
+  }
+
   const CVPreview = () => (
-    <div className="bg-white text-black p-8 shadow-lg min-h-[297mm] w-full max-w-[210mm] mx-auto">
+    <div className={`bg-white text-black p-8 shadow-lg min-h-[297mm] w-full max-w-[210mm] mx-auto ${selectedTemplate} ${selectedColor}`}>
       {/* Header */}
-      <div className="border-b-2 border-blue-500 pb-6 mb-6">
+      <div className={`border-b-2 border-${selectedColor}-500 pb-6 mb-6`}>
         <h1 className="text-3xl font-bold text-gray-800 mb-2">{cvData.personal.fullName || "Your Name"}</h1>
-        <h2 className="text-xl text-blue-600 mb-4">{cvData.personal.title || "Your Job Title"}</h2>
+        <h2 className={`text-xl text-${selectedColor}-600 mb-4`}>{cvData.personal.title || "Your Job Title"}</h2>
         <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
           <div className="space-y-1">
             {cvData.personal.email && (
@@ -406,7 +484,7 @@ export default function CVBuilderPage() {
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <h4 className="font-semibold text-gray-800">{exp.position}</h4>
-                      <p className="text-blue-600 font-medium">{exp.company}</p>
+                      <p className={`text-${selectedColor}-600 font-medium`}>{exp.company}</p>
                     </div>
                     <div className="text-sm text-gray-600">
                       {exp.startDate} - {exp.current ? (language === "vi" ? "Hiện tại" : "Present") : exp.endDate}
@@ -433,7 +511,7 @@ export default function CVBuilderPage() {
                   <div className="flex justify-between items-start">
                     <div>
                       <h4 className="font-semibold text-gray-800">{edu.degree}</h4>
-                      <p className="text-blue-600">{edu.school}</p>
+                      <p className={`text-${selectedColor}-600`}>{edu.school}</p>
                       {edu.field && <p className="text-sm text-gray-600">{edu.field}</p>}
                     </div>
                     <div className="text-sm text-gray-600">
@@ -463,7 +541,7 @@ export default function CVBuilderPage() {
                     <span className="text-xs text-gray-600">{skill.level}%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${skill.level}%` }}></div>
+                    <div className={`bg-${selectedColor}-500 h-2 rounded-full`} style={{ width: `${skill.level}%` }}></div>
                   </div>
                 </div>
               ))}
@@ -484,6 +562,67 @@ export default function CVBuilderPage() {
                 <div key={lang.id} className="flex justify-between">
                   <span className="text-sm text-gray-800">{lang.name}</span>
                   <span className="text-sm text-gray-600">{lang.level}</span>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* Certifications */}
+      {cvData.certifications.some((cert) => cert.name) && (
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-300 pb-1">
+            {language === "vi" ? "CHỨNG CHỈ" : "CERTIFICATIONS"}
+          </h3>
+          <div className="space-y-3">
+            {cvData.certifications
+              .filter((cert) => cert.name)
+              .map((cert) => (
+                <div key={cert.id}>
+                  <h4 className="font-semibold text-gray-800">{cert.name}</h4>
+                  <p className="text-sm text-gray-600">
+                    {cert.issuer} &bull; {cert.date}
+                  </p>
+                  {cert.url && (
+                    <a
+                      href={cert.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`text-${selectedColor}-600 text-sm hover:underline`}
+                    >
+                      {cert.url}
+                    </a>
+                  )}
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* Projects */}
+      {cvData.projects.some((proj) => proj.name) && (
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-300 pb-1">
+            {language === "vi" ? "DỰ ÁN" : "PROJECTS"}
+          </h3>
+          <div className="space-y-4">
+            {cvData.projects
+              .filter((proj) => proj.name)
+              .map((proj) => (
+                <div key={proj.id}>
+                  <h4 className="font-semibold text-gray-800">{proj.name}</h4>
+                  {proj.technologies && <p className="text-sm text-gray-600 mb-1">({proj.technologies})</p>}
+                  {proj.description && <p className="text-gray-700 text-sm leading-relaxed">{proj.description}</p>}
+                  {proj.url && (
+                    <a
+                      href={proj.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`text-${selectedColor}-600 text-sm hover:underline`}
+                    >
+                      {proj.url}
+                    </a>
+                  )}
                 </div>
               ))}
           </div>
@@ -845,21 +984,20 @@ export default function CVBuilderPage() {
                                 <Input
                                   value={edu.degree}
                                   onChange={(e) => updateEducation(edu.id, "degree", e.target.value)}
-                                  placeholder="Bachelor's Degree"
+                                  placeholder="Bachelor of Science"
                                 />
                               </div>
                             </div>
 
-                            <div>
-                              <Label>{t.field}</Label>
-                              <Input
-                                value={edu.field}
-                                onChange={(e) => updateEducation(edu.id, "field", e.target.value)}
-                                placeholder="Computer Science"
-                              />
-                            </div>
-
                             <div className="grid md:grid-cols-3 gap-4">
+                              <div>
+                                <Label>{t.field}</Label>
+                                <Input
+                                  value={edu.field}
+                                  onChange={(e) => updateEducation(edu.id, "field", e.target.value)}
+                                  placeholder="Computer Science"
+                                />
+                              </div>
                               <div>
                                 <Label>{t.startDate}</Label>
                                 <Input
@@ -876,14 +1014,14 @@ export default function CVBuilderPage() {
                                   onChange={(e) => updateEducation(edu.id, "endDate", e.target.value)}
                                 />
                               </div>
-                              <div>
-                                <Label>{t.gpa}</Label>
-                                <Input
-                                  value={edu.gpa}
-                                  onChange={(e) => updateEducation(edu.id, "gpa", e.target.value)}
-                                  placeholder="3.8/4.0"
-                                />
-                              </div>
+                            </div>
+                            <div>
+                              <Label>{t.gpa}</Label>
+                              <Input
+                                value={edu.gpa}
+                                onChange={(e) => updateEducation(edu.id, "gpa", e.target.value)}
+                                placeholder="3.8 / 4.0"
+                              />
                             </div>
                           </div>
                         ))}
@@ -901,10 +1039,10 @@ export default function CVBuilderPage() {
                           {t.addSkill}
                         </Button>
                       </CardHeader>
-                      <CardContent className="space-y-4">
+                      <CardContent className="space-y-6">
                         {cvData.skills.map((skill, index) => (
-                          <div key={skill.id} className="p-4 border rounded-lg">
-                            <div className="flex justify-between items-center mb-4">
+                          <div key={skill.id} className="p-4 border rounded-lg space-y-4">
+                            <div className="flex justify-between items-center">
                               <h4 className="font-medium">
                                 {language === "vi" ? "Kỹ năng" : "Skill"} #{index + 1}
                               </h4>
@@ -914,28 +1052,22 @@ export default function CVBuilderPage() {
                                 </Button>
                               )}
                             </div>
-
-                            <div className="space-y-4">
-                              <div>
-                                <Label>{t.skillName}</Label>
-                                <Input
-                                  value={skill.name}
-                                  onChange={(e) => updateSkill(skill.id, "name", e.target.value)}
-                                  placeholder="JavaScript"
-                                />
-                              </div>
-                              <div>
-                                <Label>
-                                  {t.skillLevel}: {skill.level}%
-                                </Label>
-                                <Slider
-                                  value={[skill.level]}
-                                  onValueChange={(value) => updateSkill(skill.id, "level", value[0])}
-                                  max={100}
-                                  step={5}
-                                  className="mt-2"
-                                />
-                              </div>
+                            <div>
+                              <Label>{t.skillName}</Label>
+                              <Input
+                                value={skill.name}
+                                onChange={(e) => updateSkill(skill.id, "name", e.target.value)}
+                                placeholder="e.g., JavaScript, Project Management"
+                              />
+                            </div>
+                            <div>
+                              <Label>{t.skillLevel} ({skill.level}%)</Label>
+                              <Slider
+                                value={[skill.level]}
+                                onValueChange={(val) => updateSkill(skill.id, "level", val[0])}
+                                max={100}
+                                step={5}
+                              />
                             </div>
                           </div>
                         ))}
@@ -948,83 +1080,46 @@ export default function CVBuilderPage() {
                     <Card>
                       <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle>{t.languages}</CardTitle>
-                        <Button
-                          onClick={() =>
-                            setCvData((prev) => ({
-                              ...prev,
-                              languages: [...prev.languages, { id: Date.now(), name: "", level: "Intermediate" }],
-                            }))
-                          }
-                          size="sm"
-                        >
+                        <Button onClick={addLanguage} size="sm">
                           <Plus className="h-4 w-4 mr-2" />
                           {t.addLanguage}
                         </Button>
                       </CardHeader>
-                      <CardContent className="space-y-4">
+                      <CardContent className="space-y-6">
                         {cvData.languages.map((lang, index) => (
-                          <div key={lang.id} className="p-4 border rounded-lg">
-                            <div className="flex justify-between items-center mb-4">
+                          <div key={lang.id} className="p-4 border rounded-lg space-y-4">
+                            <div className="flex justify-between items-center">
                               <h4 className="font-medium">
                                 {language === "vi" ? "Ngôn ngữ" : "Language"} #{index + 1}
                               </h4>
                               {cvData.languages.length > 1 && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() =>
-                                    setCvData((prev) => ({
-                                      ...prev,
-                                      languages: prev.languages.filter((l) => l.id !== lang.id),
-                                    }))
-                                  }
-                                >
+                                <Button variant="outline" size="sm" onClick={() => removeLanguage(lang.id)}>
                                   <Minus className="h-4 w-4" />
                                 </Button>
                               )}
                             </div>
-
-                            <div className="grid md:grid-cols-2 gap-4">
-                              <div>
-                                <Label>{t.languageName}</Label>
-                                <Input
-                                  value={lang.name}
-                                  onChange={(e) =>
-                                    setCvData((prev) => ({
-                                      ...prev,
-                                      languages: prev.languages.map((l) =>
-                                        l.id === lang.id ? { ...l, name: e.target.value } : l,
-                                      ),
-                                    }))
-                                  }
-                                  placeholder="English"
-                                />
-                              </div>
-                              <div>
-                                <Label>{t.languageLevel}</Label>
-                                <Select
-                                  value={lang.level}
-                                  onValueChange={(value) =>
-                                    setCvData((prev) => ({
-                                      ...prev,
-                                      languages: prev.languages.map((l) =>
-                                        l.id === lang.id ? { ...l, level: value } : l,
-                                      ),
-                                    }))
-                                  }
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {languageLevels.map((level) => (
-                                      <SelectItem key={level.value} value={level.value}>
-                                        {level.label}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
+                            <div>
+                              <Label>{t.languageName}</Label>
+                              <Input
+                                value={lang.name}
+                                onChange={(e) => updateLanguage(lang.id, "name", e.target.value)}
+                                placeholder="e.g., English, Vietnamese"
+                              />
+                            </div>
+                            <div>
+                              <Label>{t.languageLevel}</Label>
+                              <Select value={lang.level} onValueChange={(value) => updateLanguage(lang.id, "level", value)}>
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {languageLevels.map((level) => (
+                                    <SelectItem key={level.value} value={level.value}>
+                                      {level.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </div>
                           </div>
                         ))}
@@ -1037,23 +1132,12 @@ export default function CVBuilderPage() {
                     <Card>
                       <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle>{t.certifications}</CardTitle>
-                        <Button
-                          onClick={() =>
-                            setCvData((prev) => ({
-                              ...prev,
-                              certifications: [
-                                ...prev.certifications,
-                                { id: Date.now(), name: "", issuer: "", date: "", url: "" },
-                              ],
-                            }))
-                          }
-                          size="sm"
-                        >
+                        <Button onClick={addCertification} size="sm">
                           <Plus className="h-4 w-4 mr-2" />
                           {t.addCertification}
                         </Button>
                       </CardHeader>
-                      <CardContent className="space-y-4">
+                      <CardContent className="space-y-6">
                         {cvData.certifications.map((cert, index) => (
                           <div key={cert.id} className="p-4 border rounded-lg space-y-4">
                             <div className="flex justify-between items-center">
@@ -1061,85 +1145,44 @@ export default function CVBuilderPage() {
                                 {language === "vi" ? "Chứng chỉ" : "Certification"} #{index + 1}
                               </h4>
                               {cvData.certifications.length > 1 && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() =>
-                                    setCvData((prev) => ({
-                                      ...prev,
-                                      certifications: prev.certifications.filter((c) => c.id !== cert.id),
-                                    }))
-                                  }
-                                >
+                                <Button variant="outline" size="sm" onClick={() => removeCertification(cert.id)}>
                                   <Minus className="h-4 w-4" />
                                 </Button>
                               )}
                             </div>
-
+                            <div>
+                              <Label>{t.certificationName}</Label>
+                              <Input
+                                value={cert.name}
+                                onChange={(e) => updateCertification(cert.id, "name", e.target.value)}
+                                placeholder="e.g., Certified Scrum Master"
+                              />
+                            </div>
                             <div className="grid md:grid-cols-2 gap-4">
-                              <div>
-                                <Label>{t.certificationName}</Label>
-                                <Input
-                                  value={cert.name}
-                                  onChange={(e) =>
-                                    setCvData((prev) => ({
-                                      ...prev,
-                                      certifications: prev.certifications.map((c) =>
-                                        c.id === cert.id ? { ...c, name: e.target.value } : c,
-                                      ),
-                                    }))
-                                  }
-                                  placeholder="AWS Certified Developer"
-                                />
-                              </div>
                               <div>
                                 <Label>{t.issuer}</Label>
                                 <Input
                                   value={cert.issuer}
-                                  onChange={(e) =>
-                                    setCvData((prev) => ({
-                                      ...prev,
-                                      certifications: prev.certifications.map((c) =>
-                                        c.id === cert.id ? { ...c, issuer: e.target.value } : c,
-                                      ),
-                                    }))
-                                  }
-                                  placeholder="Amazon Web Services"
+                                  onChange={(e) => updateCertification(cert.id, "issuer", e.target.value)}
+                                  placeholder="e.g., Scrum.org"
                                 />
                               </div>
-                            </div>
-
-                            <div className="grid md:grid-cols-2 gap-4">
                               <div>
                                 <Label>{t.date}</Label>
                                 <Input
                                   type="month"
                                   value={cert.date}
-                                  onChange={(e) =>
-                                    setCvData((prev) => ({
-                                      ...prev,
-                                      certifications: prev.certifications.map((c) =>
-                                        c.id === cert.id ? { ...c, date: e.target.value } : c,
-                                      ),
-                                    }))
-                                  }
+                                  onChange={(e) => updateCertification(cert.id, "date", e.target.value)}
                                 />
                               </div>
-                              <div>
-                                <Label>{t.url}</Label>
-                                <Input
-                                  value={cert.url}
-                                  onChange={(e) =>
-                                    setCvData((prev) => ({
-                                      ...prev,
-                                      certifications: prev.certifications.map((c) =>
-                                        c.id === cert.id ? { ...c, url: e.target.value } : c,
-                                      ),
-                                    }))
-                                  }
-                                  placeholder="https://certification-url.com"
-                                />
-                              </div>
+                            </div>
+                            <div>
+                              <Label>{t.url}</Label>
+                              <Input
+                                value={cert.url}
+                                onChange={(e) => updateCertification(cert.id, "url", e.target.value)}
+                                placeholder="https://example.com/certificate"
+                              />
                             </div>
                           </div>
                         ))}
@@ -1152,113 +1195,60 @@ export default function CVBuilderPage() {
                     <Card>
                       <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle>{t.projects}</CardTitle>
-                        <Button
-                          onClick={() =>
-                            setCvData((prev) => ({
-                              ...prev,
-                              projects: [
-                                ...prev.projects,
-                                { id: Date.now(), name: "", description: "", technologies: "", url: "" },
-                              ],
-                            }))
-                          }
-                          size="sm"
-                        >
+                        <Button onClick={addProject} size="sm">
                           <Plus className="h-4 w-4 mr-2" />
                           {t.addProject}
                         </Button>
                       </CardHeader>
-                      <CardContent className="space-y-4">
-                        {cvData.projects.map((project, index) => (
-                          <div key={project.id} className="p-4 border rounded-lg space-y-4">
+                      <CardContent className="space-y-6">
+                        {cvData.projects.map((proj, index) => (
+                          <div key={proj.id} className="p-4 border rounded-lg space-y-4">
                             <div className="flex justify-between items-center">
                               <h4 className="font-medium">
                                 {language === "vi" ? "Dự án" : "Project"} #{index + 1}
                               </h4>
                               {cvData.projects.length > 1 && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() =>
-                                    setCvData((prev) => ({
-                                      ...prev,
-                                      projects: prev.projects.filter((p) => p.id !== project.id),
-                                    }))
-                                  }
-                                >
+                                <Button variant="outline" size="sm" onClick={() => removeProject(proj.id)}>
                                   <Minus className="h-4 w-4" />
                                 </Button>
                               )}
                             </div>
-
                             <div>
                               <Label>{t.projectName}</Label>
                               <Input
-                                value={project.name}
-                                onChange={(e) =>
-                                  setCvData((prev) => ({
-                                    ...prev,
-                                    projects: prev.projects.map((p) =>
-                                      p.id === project.id ? { ...p, name: e.target.value } : p,
-                                    ),
-                                  }))
-                                }
-                                placeholder="E-commerce Website"
+                                value={proj.name}
+                                onChange={(e) => updateProject(proj.id, "name", e.target.value)}
+                                placeholder="e.g., E-commerce Website Redesign"
                               />
                             </div>
-
+                            <div>
+                              <Label>{t.technologies}</Label>
+                              <Input
+                                value={proj.technologies}
+                                onChange={(e) => updateProject(proj.id, "technologies", e.target.value)}
+                                placeholder="e.g., React, Node.js, MongoDB"
+                              />
+                            </div>
+                            <div>
+                              <Label>{t.url}</Label>
+                              <Input
+                                value={proj.url}
+                                onChange={(e) => updateProject(proj.id, "url", e.target.value)}
+                                placeholder="https://github.com/yourproject"
+                              />
+                            </div>
                             <div>
                               <Label>{t.description}</Label>
                               <Textarea
-                                value={project.description}
-                                onChange={(e) =>
-                                  setCvData((prev) => ({
-                                    ...prev,
-                                    projects: prev.projects.map((p) =>
-                                      p.id === project.id ? { ...p, description: e.target.value } : p,
-                                    ),
-                                  }))
-                                }
+                                value={proj.description}
+                                onChange={(e) => updateProject(proj.id, "description", e.target.value)}
                                 placeholder={
                                   language === "vi"
-                                    ? "Mô tả dự án, tính năng chính và vai trò của bạn..."
-                                    : "Describe the project, main features and your role..."
+                                    ? "Mô tả ngắn gọn về mục tiêu, vai trò và thành quả của dự án..."
+                                    : "Briefly describe the project's goals, your role, and outcomes..."
                                 }
                                 rows={3}
                               />
-                            </div>
-
-                            <div className="grid md:grid-cols-2 gap-4">
-                              <div>
-                                <Label>{t.technologies}</Label>
-                                <Input
-                                  value={project.technologies}
-                                  onChange={(e) =>
-                                    setCvData((prev) => ({
-                                      ...prev,
-                                      projects: prev.projects.map((p) =>
-                                        p.id === project.id ? { ...p, technologies: e.target.value } : p,
-                                      ),
-                                    }))
-                                  }
-                                  placeholder="React, Node.js, MongoDB"
-                                />
-                              </div>
-                              <div>
-                                <Label>{t.url}</Label>
-                                <Input
-                                  value={project.url}
-                                  onChange={(e) =>
-                                    setCvData((prev) => ({
-                                      ...prev,
-                                      projects: prev.projects.map((p) =>
-                                        p.id === project.id ? { ...p, url: e.target.value } : p,
-                                      ),
-                                    }))
-                                  }
-                                  placeholder="https://project-demo.com"
-                                />
-                              </div>
                             </div>
                           </div>
                         ))}
@@ -1270,26 +1260,29 @@ export default function CVBuilderPage() {
 
               {/* Preview Section */}
               {previewMode && (
-                <div className="lg:sticky lg:top-24">
-                  <Card className="overflow-hidden">
-                    <CardHeader className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
-                      <CardTitle className="flex items-center gap-2">
-                        <Eye className="h-5 w-5" />
-                        {t.preview}
-                      </CardTitle>
+                <motion.div
+                  className="lg:sticky top-8 self-start"
+                  initial="initial"
+                  animate="animate"
+                  variants={fadeInUp}
+                >
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>{t.preview}</CardTitle>
                     </CardHeader>
                     <CardContent className="p-0">
-                      <div className="max-h-[800px] overflow-y-auto" ref={previewRef}>
+                      <div ref={previewRef} className="cv-preview-container overflow-auto h-[80vh] custom-scrollbar">
                         <CVPreview />
                       </div>
                     </CardContent>
                   </Card>
-                </div>
+                </motion.div>
               )}
             </div>
           </div>
         </section>
 
+        {/* Footer */}
         <Footer language={language} />
         <FloatingChat language={language} />
       </div>
